@@ -1,0 +1,14 @@
+{
+  "name": "unhostudy",
+  "version": "0.1.0",
+  "description": "운호스터디 - 운호고등학교 동영상 강의 공유 플랫폼",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": { "node": ">=22.13" },
+  "dependencies": {
+    "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1"
+  }
+}
