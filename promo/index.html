@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>과제함 60초 광고</title>
+<style>
+@font-face{font-family:P;src:url(assets/fonts/Pretendard-Medium.woff2) format('woff2');font-weight:500}
+@font-face{font-family:P;src:url(assets/fonts/Pretendard-SemiBold.woff2) format('woff2');font-weight:600}
+@font-face{font-family:P;src:url(assets/fonts/Pretendard-Bold.woff2) format('woff2');font-weight:700}
+@font-face{font-family:P;src:url(assets/fonts/Pretendard-ExtraBold.woff2) format('woff2');font-weight:800}
+@font-face{font-family:A;src:url(assets/fonts/archivo-latin-700-normal.woff2) format('woff2');font-weight:700}
+@font-face{font-family:A;src:url(assets/fonts/archivo-latin-800-normal.woff2) format('woff2');font-weight:800}
+:root{
+  --bg:#313338; --card:#2b2d31; --blue:#5865F2; --lblue:#a5adff; --text:#f2f3f5; --sub:#b5bac1;
+  --green:#23a55a; --yellow:#f0b232; --red:#f23f43; --navy:#161826; --violet:#9184d9;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#000}
+body{font-family:P,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased;word-break:keep-all}
+.num{font-family:A,P,sans-serif;font-weight:800;letter-spacing:-0.01em}
+#stage{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;background:var(--bg)}
+.scene{position:absolute;inset:0;display:none;overflow:hidden}
+.abs{position:absolute}
+.cam{position:absolute;left:0;top:0;width:1440px;height:900px;transform-origin:0 0}
+.cam>img.base{position:absolute;left:0;top:0;width:1440px;height:900px}
+.cover{position:absolute}
+.crop{position:absolute;border-radius:16px;transform-origin:50% 50%}
+.head{font-family:A,P;font-weight:700;color:var(--lblue);font-size:34px;letter-spacing:.02em}
+.head b{font-family:P;font-weight:700}
+
+/* caption */
+#cap{position:absolute;left:50%;bottom:56px;z-index:50;transform:translateX(-50%);
+  background:rgba(43,45,49,.94);border-radius:22px;padding:22px 44px;font-weight:700;font-size:52px;line-height:1.3;
+  white-space:nowrap;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.35);display:none}
+#cap em{font-style:normal;color:var(--lblue)}
+#cap.navy{background:rgba(31,33,56,.95)}
+#cap.navy em{color:#c3bbf2}
+
+/* S1 hook */
+#s1{background:#000}
+#s1 .lbl{left:0;right:0;top:250px;text-align:center;font-size:44px;font-weight:700;color:var(--lblue)}
+#s1 .big{left:0;right:0;top:300px;text-align:center;font-size:330px;line-height:1;color:#fff}
+#s1 .q{left:0;right:0;top:700px;text-align:center;font-size:76px;font-weight:800}
+#s1 .chips{left:0;right:0;top:830px;display:flex;justify-content:center;gap:18px}
+.chip{display:inline-block;padding:14px 30px;border-radius:999px;font-size:34px;font-weight:700;background:#24253a;color:var(--lblue)}
+
+/* S2 problem */
+#s2{background:#232428}
+.item{position:absolute;left:0;top:0;transform-origin:50% 50%;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.chat{width:720px;height:600px;border-radius:28px;background:#2b2d31;padding:28px 34px;margin:-300px 0 0 -360px}
+.chat .h{display:flex;align-items:center;gap:16px;font-size:34px;font-weight:800;padding-bottom:20px;border-bottom:2px solid #3a3c42;margin-bottom:22px}
+.chat .h i{width:54px;height:54px;border-radius:50%;background:#55575f;display:inline-block}
+.chat .badge{margin-left:auto;background:var(--red);color:#fff;border-radius:999px;padding:4px 18px;font-size:30px;font-family:A;font-weight:800}
+.msg{max-width:78%;padding:14px 22px;border-radius:22px;font-size:30px;font-weight:600;margin:12px 0;background:#3a3c43;width:max-content}
+.msg.r{margin-left:auto;background:#4a4d56}
+.paper{width:640px;height:820px;margin:-410px 0 0 -320px;background:#efede6;color:#2a2a2a;padding:56px 60px;clip-path:polygon(0 0,86% 0,100% 10%,100% 100%,0 100%)}
+.paper:before{content:"";position:absolute;right:0;top:0;width:14%;height:10%;background:linear-gradient(225deg,#232428 50%,#cfcbbf 50%)}
+.paper:after{content:"";position:absolute;left:0;right:0;top:49%;height:6%;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.10) 48%,rgba(255,255,255,.35) 52%,rgba(0,0,0,0))}
+.paper h4{font-size:40px;font-weight:800;margin-bottom:14px}
+.paper .nm{font-size:24px;font-weight:600;color:#666;margin-bottom:36px}
+.paper .ln{height:2px;background:#cdc9bd;margin:34px 0}
+.paper .bx{height:150px;border:2px solid #cdc9bd;border-radius:6px;margin:30px 0}
+.postit{width:460px;height:460px;margin:-230px 0 0 -230px;background:linear-gradient(160deg,#f6c54a,#f0b232 60%,#e3a522);color:#3b2b00;padding:52px 46px;font-size:62px;font-weight:800;line-height:1.25}
+.cal{width:760px;height:620px;margin:-310px 0 0 -380px;background:#f7f7f8;border-radius:18px;color:#222;padding:32px 40px}
+.cal .ch{display:flex;align-items:baseline;gap:16px;margin-bottom:16px}
+.cal .ch b{font-size:64px;font-weight:800}
+.cal .ch span{font-size:30px;color:#777;font-family:A;font-weight:700}
+.cal .g{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal .g div{height:74px;border-top:2px solid #ddd;font-family:A;font-weight:700;font-size:24px;color:#444;padding:4px 6px;position:relative}
+.cal .g div.w{height:34px;border:0;font-family:P;font-size:22px;color:#888}
+.cal .g div.mk:after{content:"";position:absolute;left:4px;top:0;width:46px;height:46px;border:4px solid #e0353a;border-radius:50%}
+.cal .g div small{position:absolute;left:6px;bottom:6px;font-family:P;font-size:18px;font-weight:800;color:#e0353a}
+#s2 .badge2{position:absolute;width:72px;height:72px;border-radius:50%;background:var(--red);color:#fff;font-family:A;font-weight:800;font-size:34px;display:flex;align-items:center;justify-content:center;margin:-36px 0 0 -36px}
+
+/* S3 title */
+#s3 .lock{position:absolute;left:0;right:0;top:330px;display:flex;justify-content:center;align-items:center;gap:44px}
+#s3 .lock img{height:210px}
+#s3 .lock b{font-size:190px;font-weight:800;letter-spacing:-.02em}
+#s3 .tag{left:0;right:0;top:640px;text-align:center;font-size:72px;font-weight:800}
+#s3 .who{left:0;right:0;top:760px;text-align:center;font-size:38px;font-weight:700;color:var(--lblue)}
+
+/* nav recreation */
+.nav{position:absolute;display:flex;align-items:center;height:60px;padding:0 20px;gap:0;transform-origin:0 0}
+.nav .brand{display:flex;align-items:center;gap:10px;margin-right:22px}
+.nav .brand img{height:36px}
+.nav .brand b{display:block;font-size:16px;font-weight:800;line-height:1.1}
+.nav .brand small{display:block;font-size:11px;font-weight:500;color:var(--sub)}
+.nav .ni{position:relative;z-index:2;padding:6px 10px;line-height:1.15}
+.nav .ni i{display:block;font-style:normal;font-family:A;font-weight:700;font-size:10px;color:var(--lblue)}
+.nav .ni span{display:block;font-size:13px;font-weight:700;white-space:nowrap}
+.nav .ni.on i{color:#dfe2ff}
+.nav .pill{position:absolute;z-index:1;top:7px;height:46px;border-radius:14px;background:var(--blue)}
+
+/* S5 montage */
+#s5 .navwrap{position:absolute;left:0;top:0;width:1920px;height:120px;border-bottom:2px solid #3a3c42;background:var(--bg)}
+#s5 .slide{position:absolute;left:0;top:0;width:1920px;height:1080px}
+#s5 .slide .n{position:absolute;left:150px;top:250px;font-size:400px;line-height:1;color:var(--blue)}
+#s5 .slide .h{position:absolute;left:820px;top:320px}
+#s5 .slide .t{position:absolute;left:820px;top:380px;font-size:132px;font-weight:800;letter-spacing:-.02em}
+#s5 .slide .d{position:absolute;left:820px;top:560px;font-size:52px;font-weight:700;color:var(--sub)}
+
+/* S6 */
+#s6{background:#1e1f22}
+.sheet{position:absolute;left:330px;top:-150px;width:1260px;height:1500px;background:#f4f2ec;color:#222;padding:90px 100px;transform-origin:50% 40%}
+.sheet .sh{display:flex;justify-content:space-between;font-size:30px;font-weight:700;color:#555;border-bottom:3px solid #333;padding-bottom:18px;margin-bottom:46px}
+.sheet .faint{height:22px;background:#d9d6cc;border-radius:4px;margin:20px 0}
+.sheet .prob{position:relative;font-size:44px;font-weight:600;line-height:1.55;padding:26px 30px;margin:40px -30px;border-radius:14px}
+.sheet .prob b{font-weight:800}
+.sheet .pen{font-family:P;font-weight:700;color:#2346c8;font-size:50px;margin:30px 0 0 60px;transform:rotate(-2deg);display:block;width:max-content}
+.sheet .x{position:absolute;left:560px;top:120px;font-size:150px;font-weight:800;color:#e0353a;transform:rotate(-8deg)}
+.vf{position:absolute;inset:0}
+.vf .c{position:absolute;width:110px;height:110px;border:0 solid #fff}
+.vf .shut{position:absolute;right:70px;top:450px;width:130px;height:130px;border-radius:50%;border:8px solid #fff;display:flex;align-items:center;justify-content:center}
+.vf .shut i{width:96px;height:96px;border-radius:50%;background:#fff;display:block}
+.scan{position:absolute;left:0;right:0;height:6px;background:var(--blue);box-shadow:0 0 30px 10px rgba(88,101,242,.65)}
+.scantint{position:absolute;left:0;right:0;top:0;background:rgba(88,101,242,.10)}
+.detect{position:absolute;border:6px solid var(--blue);border-radius:18px}
+.hd6{position:absolute;left:72px;top:56px;z-index:5;padding:12px 24px;border-radius:14px;background:rgba(30,31,34,.8)}
+
+/* S7 */
+#s7{background:var(--navy)}
+#s7 .qq{position:absolute;left:0;right:0;top:300px;text-align:center}
+#s7 .qq div{font-size:96px;font-weight:800;line-height:1.35;letter-spacing:-.01em}
+#s7 .qq div em{font-style:normal;color:var(--violet)}
+.cursor{position:absolute;width:64px;height:64px;z-index:20;transform-origin:0 0}
+.ripple{position:absolute;border-radius:50%;border:4px solid #fff}
+.ctrl{position:absolute;left:0;right:0;bottom:0;height:64px;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.75));display:flex;align-items:center;gap:14px;padding:0 18px;color:#fff;font-size:18px;font-weight:700}
+.ctrl .bar{position:absolute;left:18px;right:18px;top:6px;height:5px;background:rgba(255,255,255,.3);border-radius:3px}
+.ctrl .bar i{display:block;height:100%;background:var(--violet);border-radius:3px}
+.ctrl .sp{margin-left:auto}
+.ctrl .ck{padding:4px 12px;border-radius:999px;background:rgba(255,255,255,.18)}
+.ctrl .ck.on{background:var(--violet)}
+.subt{position:absolute;left:0;right:0;bottom:84px;text-align:center}
+.subt span{background:rgba(0,0,0,.78);color:#fff;font-size:30px;font-weight:700;padding:6px 16px;border-radius:6px}
+
+/* S8 */
+#s8 .pane{position:absolute;inset:0}
+#s8 .lab{position:absolute;left:140px;top:150px}
+#s8 .L{position:absolute;left:132px;top:210px;font-size:220px;line-height:1;color:var(--blue)}
+#s8 .M{position:absolute;left:140px;top:470px;font-size:96px;font-weight:800;line-height:1.25;letter-spacing:-.02em}
+#s8 .Sb{position:absolute;left:140px;top:745px;font-size:44px;font-weight:700;color:var(--sub)}
+#s8 .vis{position:absolute;left:1180px;top:240px;width:600px;height:600px}
+.srv{position:absolute;left:40px;top:60px;width:520px;height:420px;border-radius:28px;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.srv img{height:150px}
+.srv b{font-size:42px;font-weight:800}
+.srv .ok{font-size:30px;font-weight:700;color:var(--sub)}
+.srv .ok i{display:inline-block;width:16px;height:16px;border-radius:50%;background:var(--green);margin-right:10px;vertical-align:2px}
+.adzero{position:absolute;left:330px;top:400px;padding:18px 36px;border-radius:999px;background:var(--blue);font-size:44px;font-weight:800;box-shadow:0 16px 40px rgba(0,0,0,.35)}
+.adzero .num{font-size:52px}
+.note{position:absolute;left:0;top:90px;width:600px;height:400px;border-radius:28px;overflow:hidden;background:var(--card)}
+.note .in{position:absolute;inset:0;background:url(assets/img/vocab.png) -170px -700px / 1440px 900px no-repeat}
+.padlock{position:absolute;left:220px;top:180px;width:160px;height:200px}
+.flow{position:absolute;left:30px;top:40px;display:flex;flex-direction:column;align-items:flex-start;gap:0}
+.flow .fc{padding:22px 40px;border-radius:999px;background:var(--card);font-size:44px;font-weight:800;white-space:nowrap}
+.flow .fc.hi{background:var(--blue)}
+.flow .ar{font-size:44px;color:var(--lblue);padding:8px 0 8px 60px;font-weight:800}
+
+/* S9 devices */
+.dev{position:absolute;left:0;top:0;transform-origin:50% 50%}
+.mon{width:744px;padding:12px;border-radius:20px;background:#17181b;border:2px solid #45474e}
+.mon .scr{position:relative;width:720px;height:450px;overflow:hidden;border-radius:8px}
+.mon .scr img{position:absolute;inset:0;width:100%;height:100%}
+.mon .st{width:180px;height:60px;margin:0 auto;background:linear-gradient(#2a2b30,#1d1e22);clip-path:polygon(20% 0,80% 0,100% 100%,0 100%)}
+.tab{width:556px;padding:18px;border-radius:34px;background:#17181b;border:2px solid #45474e}
+.tab img{display:block;width:520px;height:325px;border-radius:10px}
+.pho{width:318px;padding:14px;border-radius:52px;background:#17181b;border:2px solid #45474e}
+.pho img{display:block;width:290px;height:628px;border-radius:40px}
+.addhome{position:absolute;padding:20px 36px;border-radius:999px;background:var(--blue);font-size:40px;font-weight:800;white-space:nowrap;display:flex;align-items:center;gap:14px;box-shadow:0 16px 40px rgba(0,0,0,.35)}
+.addhome i{font-style:normal;font-size:48px;line-height:1}
+
+/* S10 end */
+#s10 .panel{position:absolute;left:80px;top:80px;width:760px;height:920px;border-radius:40px;background:var(--blue);overflow:hidden}
+#s10 .panel .ph{position:absolute;left:44px;right:44px;top:44px;display:flex;align-items:center;gap:16px;font-size:30px;font-weight:800;padding-bottom:26px;border-bottom:3px solid rgba(0,0,0,.18)}
+#s10 .panel .ph img{height:56px}
+#s10 .panel .ph span{margin-left:auto}
+#s10 .panel .big{position:absolute;left:36px;bottom:150px;font-size:240px;font-weight:800;letter-spacing:-.04em;line-height:1}
+#s10 .panel .pf{position:absolute;left:44px;bottom:52px;font-size:30px;font-weight:700;line-height:1.45}
+#s10 .copy{position:absolute;left:940px;top:270px}
+#s10 .copy .c1{font-size:104px;font-weight:800;line-height:1.22;letter-spacing:-.02em}
+#s10 .copy .c1 em{font-style:normal;color:var(--lblue)}
+#s10 .copy .c2{margin-top:36px;font-size:44px;font-weight:700;color:var(--sub)}
+#s10 .addr{position:absolute;left:940px;top:700px;display:flex;align-items:center;gap:36px}
+#s10 .addr .qr{width:220px;height:220px;background:#fff;border-radius:18px;padding:14px}
+#s10 .addr .qr svg{width:100%;height:100%;display:block}
+#s10 .addr .u{font-family:A,P;font-weight:800;font-size:48px}
+#s10 .addr .ul{font-size:30px;font-weight:700;color:var(--lblue);margin-bottom:10px}
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- S1 HOOK 0–3 -->
+<section class="scene" id="s1">
+  <div class="abs lbl" id="s1lbl">다음 시험</div>
+  <div class="abs big num" id="s1num">D-11</div>
+  <div class="abs q" id="s1q">이번 주 시험, 몇 개야?</div>
+  <div class="abs chips" id="s1chips">
+    <span class="chip">D-4 수행평가</span><span class="chip">D-11 수학 중간고사</span><span class="chip">D-11 국어 중간고사</span><span class="chip">D-12 영어 중간고사</span>
+  </div>
+</section>
+
+<!-- S2 PROBLEM 3–8, S3 TITLE 8–12 share the scattered items -->
+<section class="scene" id="s2">
+  <div class="item chat" id="it0">
+    <div class="h"><i></i>1학년 8반 단체방<span class="badge num" id="chatBadge">3</span></div>
+    <div class="msg">내일 수행평가 범위 어디까지야?</div>
+    <div class="msg">공지 위에 올렸어!</div>
+    <div class="msg r">어디?? 안 보여 ㅠㅠ</div>
+    <div class="msg">프린트 못 받은 사람?</div>
+    <div class="msg r">사진 다시 올려줘…</div>
+  </div>
+  <div class="item paper" id="it1">
+    <h4>통합과학 · 탐구 보고서 양식</h4>
+    <div class="nm">1학년 8반 ____번 이름 ________</div>
+    <div class="ln"></div><div class="ln"></div><div class="bx"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="bx"></div>
+  </div>
+  <div class="item postit" id="it2">수학 익힘책<br>3단원<br>금요일까지!!</div>
+  <div class="item cal" id="it3">
+    <div class="ch"><b>10월</b><span>2026</span></div>
+    <div class="g" id="calg"></div>
+  </div>
+  <div class="badge2 num" id="nb0">+1</div><div class="badge2 num" id="nb1">+5</div><div class="badge2 num" id="nb2">+9</div>
+  <section id="s3" style="position:absolute;inset:0">
+    <div class="lock" id="s3lock"><img src="assets/img/crest.png" alt=""><b>과제함</b></div>
+    <div class="abs tag" id="s3tag">우리 반의 모든 것, 한곳에</div>
+    <div class="abs who" id="s3who">운호고등학교 · 1학년 8반</div>
+  </section>
+</section>
+
+<!-- S4 HOME 12–20 -->
+<section class="scene" id="s4">
+  <div class="cam" id="cam4">
+    <img class="base" src="assets/img/home.png" alt="">
+    <div class="cover" style="left:140px;top:218px;width:1160px;height:682px;background:var(--bg)"></div>
+    <div class="crop" id="c4_d4"     style="left:158px;top:230px;width:555px;height:300px;background:url(assets/img/home.png) -158px -230px">
+      <!-- number roll overlay (inside D-4 card) -->
+      <div class="cover" id="ov_d4" style="left:22px;top:70px;width:300px;height:100px;background:var(--blue);overflow:hidden">
+        <div class="num" id="ov_d4t" style="position:absolute;left:4px;top:9px;font-size:91px;line-height:1;color:#fff">D-4</div>
+      </div>
+    </div>
+    <div class="crop" id="c4_timer"  style="left:727px;top:230px;width:271px;height:300px;background:url(assets/img/home.png) -727px -230px">
+      <!-- ring overlay -->
+      <div class="cover" id="ov_ring" style="left:57px;top:56px;width:159px;height:159px;background:var(--card)">
+        <svg width="159" height="159" viewBox="0 0 159 159" style="position:absolute;left:0;top:0">
+          <circle cx="79.5" cy="79.5" r="67" fill="none" stroke="#404249" stroke-width="14"/>
+          <circle id="ringArc" cx="79.5" cy="79.5" r="67" fill="none" stroke="#5865F2" stroke-width="14" stroke-linecap="round"
+            stroke-dasharray="0 999" transform="rotate(-90 79.5 79.5)"/>
+        </svg>
+        <div class="num" id="ringT" style="position:absolute;left:0;right:0;top:59px;text-align:center;font-size:27px;line-height:1;color:#fff">0:00</div>
+        <div style="position:absolute;left:0;right:0;top:91px;text-align:center;font-size:11px;font-weight:500;color:var(--sub)">/ 2시간 목표</div>
+      </div>
+    </div>
+    <div class="crop" id="c4_todo"   style="left:727px;top:544px;width:555px;height:169px;background:url(assets/img/home.png) -727px -544px"></div>
+    <div class="crop" id="c4_recent" style="left:158px;top:544px;width:555px;height:169px;background:url(assets/img/home.png) -158px -544px"></div>
+    <div class="crop" id="c4_vocab"  style="left:1012px;top:230px;width:270px;height:143px;background:url(assets/img/home.png) -1012px -230px"></div>
+    <div class="crop" id="c4_rank"   style="left:1012px;top:387px;width:270px;height:143px;background:url(assets/img/home.png) -1012px -387px"></div>
+    <div class="crop" id="c4_vote"   style="left:158px;top:727px;width:555px;height:120px;background:url(assets/img/home.png) -158px -727px"></div>
+    <div class="crop" id="c4_notice" style="left:727px;top:727px;width:555px;height:120px;background:url(assets/img/home.png) -727px -727px"></div>
+  </div>
+</section>
+
+<!-- S5 MONTAGE 20–24 -->
+<section class="scene" id="s5">
+  <div class="slide" id="sl0"><div class="n num">02</div><div class="h head">02 / 11 — <b>공지함</b></div><div class="t">공지함</div><div class="d">공지 · 첨부 · 읽음 확인 · 댓글</div></div>
+  <div class="slide" id="sl1"><div class="n num">04</div><div class="h head">04 / 11 — <b>과제 자료</b></div><div class="t">과제 자료</div><div class="d">과목별 자료 · 폴더 · PDF 미리보기</div></div>
+  <div class="slide" id="sl2"><div class="n num">05</div><div class="h head">05 / 11 — <b>시험 달력</b></div><div class="t">시험 달력</div><div class="d">월 달력 · D-day</div></div>
+  <div class="slide" id="sl3"><div class="n num">06</div><div class="h head">06 / 11 — <b>투표</b></div><div class="t">투표</div><div class="d">반 투표 · 설문</div></div>
+  <div class="slide" id="sl4"><div class="n num">08</div><div class="h head">08 / 11 — <b>출석부</b></div><div class="t">출석부</div><div class="d">날짜별 출석 · 월별 통계</div></div>
+  <div class="navwrap"><div class="nav" id="nav5"></div></div>
+</section>
+
+<!-- S6 AI 오답노트 24–34 -->
+<section class="scene" id="s6">
+  <div class="sheet" id="sheet">
+    <div class="sh"><span>2026학년도 6월 고1 모의고사</span><span>수학 영역</span></div>
+    <div class="faint" style="width:92%"></div><div class="faint" style="width:70%"></div>
+    <div class="prob" id="prob"><b>21.</b> 이차함수 y = x² − 4x + 3 의 그래프의<br>꼭짓점의 좌표와 x절편을 구하시오. [4점]
+      <div class="x">✗</div>
+      <div class="pen">꼭짓점 (2, 1) ?</div>
+    </div>
+    <div class="faint" style="width:88%;margin-top:70px"></div><div class="faint" style="width:95%"></div><div class="faint" style="width:60%"></div>
+    <div class="faint" style="width:84%;margin-top:60px"></div><div class="faint" style="width:76%"></div>
+  </div>
+  <div class="scantint" id="scantint"></div>
+  <div class="scan" id="scan"></div>
+  <div class="detect" id="detect"></div>
+  <div class="vf" id="vf">
+    <div class="c" style="left:300px;top:250px;border-left-width:8px;border-top-width:8px;border-radius:24px 0 0 0"></div>
+    <div class="c" style="right:300px;top:250px;border-right-width:8px;border-top-width:8px;border-radius:0 24px 0 0"></div>
+    <div class="c" style="left:300px;bottom:250px;border-left-width:8px;border-bottom-width:8px;border-radius:0 0 0 24px"></div>
+    <div class="c" style="right:300px;bottom:250px;border-right-width:8px;border-bottom-width:8px;border-radius:0 0 24px 0"></div>
+    <div class="shut" id="shut"><i></i></div>
+  </div>
+  <div class="abs" id="flash" style="inset:0;background:#fff"></div>
+  <div class="cam" id="cam6">
+    <img class="base" id="wnA" src="assets/img/wrongnote.png" alt="">
+    <div class="cover" id="wn_l0" style="left:188px;top:497px;width:362px;height:21px;background:var(--card)"></div>
+    <div class="cover" id="wn_l1" style="left:188px;top:523px;width:362px;height:21px;background:var(--card)"></div>
+    <div class="cover" id="wn_l2" style="left:188px;top:549px;width:362px;height:22px;background:var(--card)"></div>
+    <div class="cover" id="wn_c0" style="left:172px;top:619px;width:548px;height:56px;background:var(--card)"></div>
+    <div class="cover" id="wn_c1" style="left:722px;top:619px;width:550px;height:56px;background:var(--card)"></div>
+    <div class="cover" id="wnExt" style="left:-400px;top:900px;width:2240px;height:600px;background:var(--bg)"></div>
+    <div class="cover" id="wnGraph" style="left:159px;top:704px;width:1122px;height:476px;background:var(--card);border-radius:0 0 16px 16px">
+      <svg id="graph" width="1122" height="476" viewBox="0 0 1122 476" style="position:absolute;left:0;top:0"></svg>
+    </div>
+    <img class="base" id="wnB" src="assets/img/wrongnote-list.png" alt="">
+  </div>
+  <div class="hd6 head" id="hd6">10 / 11 — <b>개인 공간 · 오답노트</b></div>
+</section>
+
+<!-- S7 운호스터디 34–42 -->
+<section class="scene" id="s7">
+  <div class="cam" id="cam7">
+    <img class="base" src="assets/img/study-player.png" alt="">
+    <div class="cover" style="left:261px;top:179px;width:1148px;height:14px;background:#232532">
+      <div style="position:absolute;left:2px;top:3px;right:2px;height:8px;border-radius:4px;background:#34364a"><div id="upbar" style="height:100%;width:0;border-radius:3px;background:var(--violet)"></div></div>
+    </div>
+    <div class="cover" id="upR" style="left:1250px;top:150px;width:140px;height:24px;background:#232532;text-align:right;font-size:12px;font-weight:700;color:var(--violet);line-height:24px"><span class="num" id="upPct">0%</span></div>
+    <div class="cover" id="upL" style="left:260px;top:200px;width:560px;height:22px;background:#232532;font-size:12px;font-weight:500;color:var(--sub);line-height:22px;padding-left:3px" id="upL">업로드 중 · 낮은 화질(360p)로 먼저 공개돼요</div>
+    <div class="cover" id="playhide" style="left:794px;top:591px;width:82px;height:82px"><i style="position:absolute;left:0;top:0;width:41px;height:82px;background:rgb(0,14,253)"></i><i style="position:absolute;left:41px;top:0;width:41px;height:82px;background:rgb(255,241,2)"></i></div>
+    <div class="cover" id="vidov" style="left:249px;top:309px;width:1172px;height:591px;overflow:hidden">
+      <div class="subt" id="subt"><span>꼭짓점은 완전제곱식으로 바꾸면 바로 보여요</span></div>
+      <div class="ctrl"><div class="bar"><i id="vbar" style="width:3%"></i></div>
+        <span>▶</span><span class="num" id="vtime" style="font-size:16px">0:12 / 6:40</span>
+        <span class="sp"></span><span class="ck num" id="spd">1.0x</span><span class="ck on">자막</span><span class="ck num">720p</span></div>
+    </div>
+  </div>
+  <div class="qq" id="s7q">
+    <div id="q0">모르는 문제,</div>
+    <div id="q1">반에서 제일 잘 푸는 친구가</div>
+    <div id="q2"><em>영상으로 설명해 준다면?</em></div>
+  </div>
+  <div class="hd6 head" id="hd7" style="background:rgba(22,24,38,.85);color:#c3bbf2">11 / 11 — <b>운호스터디</b></div>
+  <svg class="cursor" id="cursor" viewBox="0 0 32 32"><path d="M5 3 L5 25 L11 19.5 L15 28.5 L19 26.8 L15 18 L23 18 Z" fill="#fff" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/></svg>
+  <div class="ripple" id="ripple"></div>
+</section>
+
+<!-- S8 남다른 점 42–50 -->
+<section class="scene" id="s8">
+  <div class="pane" id="pA">
+    <div class="lab head">과제함만의 3가지</div>
+    <div class="L num">A</div>
+    <div class="M">우리 반 데이터는<br>우리 학교 안에</div>
+    <div class="Sb">학교 컴퓨터 한 대에서 돌아가요 · 광고가 없어요</div>
+    <div class="vis">
+      <div class="srv" id="srv"><img src="assets/img/crest.png" alt=""><b>학교 컴퓨터 한 대</b><div class="ok"><i></i>우리 반 전용</div></div>
+      <div class="adzero" id="adzero">광고 <span class="num">0</span></div>
+    </div>
+  </div>
+  <div class="pane" id="pB">
+    <div class="lab head">과제함만의 3가지</div>
+    <div class="L num">B</div>
+    <div class="M">선생님도 못 여는<br>내 공부 노트</div>
+    <div class="Sb">개인 공간의 글은 내 비밀번호로 잠겨요</div>
+    <div class="vis">
+      <div class="note"><div class="in" id="noteIn"></div></div>
+      <svg class="padlock" id="padlock" viewBox="0 0 160 200">
+        <path id="shackle" d="M40 100 V62 a40 40 0 0 1 80 0 V100" fill="none" stroke="#f2f3f5" stroke-width="18" stroke-linecap="round"/>
+        <rect x="14" y="92" width="132" height="104" rx="22" fill="#5865F2"/>
+        <circle cx="80" cy="136" r="13" fill="#f2f3f5"/><rect x="74" y="140" width="12" height="28" rx="6" fill="#f2f3f5"/>
+      </svg>
+    </div>
+  </div>
+  <div class="pane" id="pC">
+    <div class="lab head">과제함만의 3가지</div>
+    <div class="L num">C</div>
+    <div class="M">오늘 할 공부를<br>앱이 먼저 말해 준다</div>
+    <div class="Sb">순공 → 순위 · 오답 → 복습 · 영단어 → 1·4·7·14일</div>
+    <div class="vis">
+      <div class="flow">
+        <div class="fc" id="f0">순공 타이머 <span class="num">1:23</span></div><div class="ar" id="a0">↓</div>
+        <div class="fc" id="f1">순공 순위</div><div class="ar" id="a1">↓</div>
+        <div class="fc" id="f2">복습 알림</div><div class="ar" id="a2">↓</div>
+        <div class="fc hi" id="f3">오늘 할 공부</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- S9 사용 장면 50–56 -->
+<section class="scene" id="s9">
+  <div class="dev mon" id="dMon"><div class="scr"><img id="monA" src="assets/img/login.png" alt=""><img id="monB" src="assets/img/home.png" alt=""></div><div class="st"></div></div>
+  <div class="dev tab" id="dTab"><img src="assets/img/wrongnote-list.png" alt=""></div>
+  <div class="dev pho" id="dPho"><img src="assets/img/m-home.png" alt=""></div>
+  <div class="addhome" id="addhome"><i>＋</i>홈 화면에 추가</div>
+</section>
+
+<!-- S10 END 56–60 -->
+<section class="scene" id="s10">
+  <div class="panel" id="panel">
+    <div class="ph"><img src="assets/img/crest.png" alt="">운호고등학교<span>1학년 8반</span></div>
+    <div class="big" id="pbig">과제함</div>
+    <div class="pf">수업 자료 · 공지 · 시험 · 투표 · 출석,<br>그리고 나만의 공부 공간.</div>
+  </div>
+  <div class="copy" id="copy">
+    <div class="c1">우리 반의 모든 것,<br><em>과제함</em> 하나로.</div>
+    <div class="c2" id="c2">휴대폰 · 태블릿 · 컴퓨터, 브라우저로 바로</div>
+  </div>
+  <div class="addr" id="addr" style="display:none">
+    <div class="qr" id="qr"></div>
+    <div><div class="ul">지금 접속하기</div><div class="u" id="url"></div></div>
+  </div>
+</section>
+
+<div id="cap"></div>
+</div>
+
+<script>
+// ---------- config (render.mjs may override via window.CONFIG before init) ----------
+window.CONFIG = Object.assign({ url: '', qrSvg: '' }, window.CONFIG || {});
+const DURATION = 60;
+
+// ---------- helpers ----------
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const P = (t, a, d) => clamp((t - a) / d);
+const lerp = (a, b, x) => a + (b - a) * x;
+const eo = x => 1 - Math.pow(1 - x, 3);
+const eo4 = x => 1 - Math.pow(1 - x, 4);
+const ei = x => x * x * x;
+const eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+function T(el, { x = 0, y = 0, s = 1, r = 0, o = 1 } = {}) {
+  el.style.transform = `translate(${x}px,${y}px) scale(${s}) rotate(${r}deg)`;
+  el.style.opacity = o;
+}
+// "착 맞춰지는" entrance: 0.35s ease-out, scale .94 -> 1, opacity 0 -> 1
+function pop(t, t0, d = 0.35, from = 0.94) { const k = eo(P(t, t0, d)); return { o: k, s: lerp(from, 1, k) }; }
+// fade/rise entrance & exit
+function rise(el, t, tIn, tOut, dy = 24, dIn = 0.35, dOut = 0.2) {
+  const a = eo(P(t, tIn, dIn)), b = tOut == null ? 0 : P(t, tOut, dOut);
+  T(el, { y: (1 - a) * dy - b * 12, o: a * (1 - b) });
+}
+// camera: focus point (cx,cy) in 1440x900 screenshot space, scale s
+function cam(el, cx, cy, s) { el._cam = { tx: 960 - cx * s, ty: 540 - cy * s, s }; el.style.transform = `translate(${el._cam.tx}px,${el._cam.ty}px) scale(${s})`; }
+function camLerp(el, A, B, k) { cam(el, lerp(A[0], B[0], k), lerp(A[1], B[1], k), Math.exp(lerp(Math.log(A[2]), Math.log(B[2]), k))); }
+const FULL = [720, 450, 1.2];
+
+// ---------- captions (subtitles; readable with sound off) ----------
+const CAPS = [
+  [3.1, 4.2, '공지는 <em>단체방</em>에'],
+  [4.3, 5.4, '자료는 <em>프린트</em>로'],
+  [5.5, 6.6, '할 일은 <em>포스트잇</em>에'],
+  [6.7, 7.85, '시험 일정은 <em>달력</em>에'],
+  [13.3, 16.3, '오늘 중요한 것일수록, <em>크게</em>.'],
+  [16.4, 18.3, '다음 시험 D-day · 순공 타이머 · 할 일을 한 화면에'],
+  [18.4, 19.85, '흩어져 있던 반 생활이 <em>한 앱에</em>'],
+  [20.1, 23.9, '<em>01</em>부터 <em>11</em>까지, 우리 반의 하루.'],
+  [24.4, 27.3, '틀린 문제, <em>찍기만</em> 하면'],
+  [27.7, 29.7, '찍으면, <em>오답노트</em>가 된다.'],
+  [29.8, 31.5, 'AI가 문제를 나누고 해석을 채워요 · 나는 <em>확인하고 넣기만</em>'],
+  [31.7, 33.9, '비슷한 문제로 다시 · <em>1·4·7·14일</em> 간격 복습'],
+  [35.9, 38.0, '올리면 <em>낮은 화질로 먼저</em> 공개, 높은 화질은 이어서', 'navy'],
+  [38.4, 40.3, '친구가 <em>선생님</em>이 되는 곳.', 'navy'],
+  [40.4, 41.9, '배속 · 자막 · 화질 · <em>이어 보기</em>', 'navy'],
+  [50.35, 52.3, '휴대폰 · 태블릿 · 컴퓨터, <em>브라우저로 바로</em>'],
+  [52.4, 54.0, '<em>학번과 이름</em>으로 로그인하면 끝'],
+  [54.1, 55.9, '휴대폰은 <em>홈 화면에 추가</em>하면 앱처럼'],
+];
+function renderCaption(t) {
+  const el = $('cap');
+  const c = CAPS.find(c => t >= c[0] && t < c[1]);
+  if (!c) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  if (el.dataset.k !== String(c[0])) { el.innerHTML = c[2]; el.className = c[3] || ''; el.dataset.k = c[0]; }
+  const a = eo(P(t, c[0], 0.25)), b = P(t, c[1] - 0.15, 0.15);
+  el.style.opacity = a * (1 - b);
+  el.style.transform = `translateX(-50%) translateY(${(1 - a) * 16}px)`;
+}
+
+// ---------- sound cue sheet (read by music.py through render.mjs) ----------
+const SFX = [];
+const cue = (t, k, g = 1) => SFX.push({ t: +t.toFixed(3), k, g });
+
+// ---------- scene timing ----------
+const SC = {
+  s1: [0, 3], s2: [3, 12.05], s4: [11.85, 20], s5: [20, 24], s6: [24, 34], s7: [34, 42],
+  s8: [42, 50], s9: [50, 56], s10: [56, 60.1],
+};
+
+// ===== S1 HOOK =====
+function s1(t) {
+  // D-11 -> D-4 number roll, lands at 0.85
+  const k = P(t, 0.15, 0.7), n = Math.round(lerp(11, 4, eo(k)));
+  $('s1num').textContent = 'D-' + n;
+  const land = eo(P(t, 0.85, 0.3));
+  T($('s1num'), { s: t < 0.85 ? 1.04 : lerp(1.06, 1, land), o: eo(P(t, 0.05, 0.2)) * (1 - P(t, 2.8, 0.2)) });
+  rise($('s1lbl'), t, 0.1, 2.8);
+  rise($('s1q'), t, 1.3, 2.8);
+  [...$('s1chips').children].forEach((c, i) => { const p = pop(t, 1.95 + i * 0.06); T(c, { s: p.s, o: p.o * (1 - P(t, 2.8, 0.2)) }); });
+}
+(() => { // cue a soft tick whenever the number changes
+  let prev = 11;
+  for (let t = 0.15; t <= 0.86; t += 1 / 240) { const n = Math.round(lerp(11, 4, eo(P(t, 0.15, 0.7)))); if (n !== prev) { cue(t, 'tick', 0.5); prev = n; } }
+  cue(0.85, 'boom');
+  cue(1.95, 'tok', 0.35);
+})();
+
+// ===== S2 PROBLEM (3–8) + S3 TITLE (8–12) =====
+const ITEMS = [ // rest positions when scattered: x, y, scale, rot
+  { id: 'it0', rest: [470, 330, 0.66, -6], t: 3.0 },
+  { id: 'it1', rest: [1440, 340, 0.6, 7], t: 4.2 },
+  { id: 'it2', rest: [560, 790, 0.66, 5], t: 5.4 },
+  { id: 'it3', rest: [1400, 790, 0.6, -4], t: 6.6 },
+];
+const NOTIFS = [[3.5, 'nb0', 820, 170], [4.9, 'nb1', 1720, 160], [6.1, 'nb2', 230, 600]];
+ITEMS.forEach(it => { cue(it.t + 0.02, 'notif', 0.8); });
+[3.45, 3.75, 4.6, 4.95, 5.2, 5.85, 6.05, 6.3, 6.95, 7.1, 7.25, 7.4, 7.5, 7.6, 7.7].forEach((t, i) => cue(t, 'notif', 0.35 + i * 0.03));
+cue(7.0, 'riser');
+function s2(t) {
+  // phase A (3–8): items enter centered, then fly to rest
+  // phase B (8–8.5): everything is sucked into the logo
+  const suck = (i) => ei(P(t, 8.0 + i * 0.06, 0.45));
+  ITEMS.forEach((it, i) => {
+    const el = $(it.id);
+    const ent = eo(P(t, it.t, 0.3));
+    const next = i < 3 ? ITEMS[i + 1].t : 7.8;
+    const go = eo(P(t, next, 0.35));
+    const [rx, ry, rs, rr] = it.rest;
+    let x = lerp(960, rx, go), y = lerp(520, ry, go), s = lerp(lerp(1.22, 1, ent), rs, go), r = lerp(0, rr, go);
+    const k = suck(i);
+    x = lerp(x, 960, k); y = lerp(y, 470, k); s = lerp(s, 0.05, k); r = lerp(r, 0, k);
+    T(el, { x, y, s, r, o: ent * (1 - P(t, 8.3 + i * 0.06, 0.2)) });
+    el.style.zIndex = 10 + i;
+  });
+  // chat messages pop in quickly + unread badge climbs
+  [...$('it0').querySelectorAll('.msg')].forEach((m, i) => { const p = pop(t, 3.15 + i * 0.16, 0.25, 0.9); T(m, { s: p.s, o: p.o }); });
+  $('chatBadge').textContent = Math.round(lerp(3, 128, eo(P(t, 3.1, 4.6))));
+  NOTIFS.forEach(([t0, id, x, y]) => {
+    const p = pop(t, t0, 0.3, 0.5), out = P(t, 7.9, 0.2);
+    T($(id), { x, y, s: p.s, o: p.o * (1 - out) });
+    $(id).style.zIndex = 30;
+  });
+  $('s2').style.background = t < 8 ? '#232428' : `color-mix(in srgb, #313338 ${eo(P(t, 8, 0.5)) * 100}%, #232428)`;
+  // title
+  const lp = pop(t, 8.4, 0.4, 0.9);
+  const outK = eo(P(t, 11.7, 0.3));
+  T($('s3lock'), { y: -outK * 30, s: lp.s, o: lp.o * (1 - outK) });
+  rise($('s3tag'), t, 8.95, 11.7);
+  rise($('s3who'), t, 9.15, 11.7);
+}
+cue(8.45, 'tok', 0.9);
+
+// ===== S4 HOME (12–20) =====
+const CARDS = ['c4_d4', 'c4_timer', 'c4_todo', 'c4_recent', 'c4_vocab', 'c4_rank', 'c4_vote', 'c4_notice'];
+CARDS.forEach((c, i) => cue(12.25 + i * 0.06 + 0.2, 'tok', 0.55 - i * 0.04));
+cue(12.7, 'fill', 0.5);
+function s4(t) {
+  // camera: full view -> push in on D-4 + timer -> back out
+  const c = $('cam4');
+  const IN = [585, 380, 1.62], OUT2 = [720, 470, 1.3];
+  if (t < 15) cam(c, ...FULL);
+  else if (t < 18) camLerp(c, FULL, IN, eio(P(t, 15, 0.9)));
+  else camLerp(c, IN, OUT2, eio(P(t, 18, 0.9)));
+  c.style.opacity = eo(P(t, 11.85, 0.3));
+  CARDS.forEach((id, i) => { const p = pop(t, 12.25 + i * 0.06); T($(id), { s: p.s, o: p.o }); });
+  // D-day roll D-11 -> D-4
+  const n = Math.round(lerp(11, 4, eo(P(t, 12.45, 0.75))));
+  $('ov_d4t').textContent = 'D-' + n;
+  $('ov_d4').style.opacity = 1 - P(t, 13.4, 0.2);
+  // ring fill 0 -> 69% with 0:00 -> 1:23
+  const rk = eo(P(t, 12.7, 0.8)), C = 2 * Math.PI * 67, frac = 83 / 120;
+  $('ringArc').setAttribute('stroke-dasharray', `${(C * frac * rk).toFixed(2)} 999`);
+  const secs = Math.round(83 * rk);
+  $('ringT').textContent = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+  $('ov_ring').style.opacity = 1 - P(t, 13.6, 0.25);
+}
+
+// ===== S5 MONTAGE (20–24) =====
+const NAV = ['홈', '공지함', '뉴스', '과제 자료', '시험 달력', '투표', '순공 순위', '출석부', '개인 과제', '개인 공간', '운호스터디'];
+const MONT = [[20.0, 1], [20.75, 3], [21.5, 4], [22.25, 5], [23.0, 7]]; // [start, nav index]
+MONT.forEach(([t0], i) => cue(t0 + 0.02, i ? 'swish' : 'tok', 0.5));
+function buildNav(el) {
+  el.innerHTML = `<div class="brand"><img src="assets/img/crest.png" alt=""><div><b>과제함</b><small>운호고 1학년 8반</small></div></div>` +
+    NAV.map((n, i) => `<div class="ni"><i>${String(i + 1).padStart(2, '0')}</i><span>${n}</span></div>`).join('') + `<div class="pill"></div>`;
+}
+let navGeo = null;
+function s5(t) {
+  const nav = $('nav5');
+  const sc = 1.62;
+  if (!navGeo) {
+    const items = [...nav.querySelectorAll('.ni')];
+    navGeo = items.map(e => [e.offsetLeft, e.offsetWidth]);
+    nav.dataset.w = nav.scrollWidth;
+  }
+  nav.style.transform = `translate(${(1920 - nav.dataset.w * sc) / 2}px, 12px) scale(${sc})`;
+  let idx = 0; MONT.forEach(([t0], i) => { if (t >= t0) idx = i; });
+  // pill slides between items (0.3s ease-out); first entry slides from 01 (홈)
+  const from = idx === 0 ? 0 : MONT[idx - 1][1], to = MONT[idx][1];
+  const k = eo(P(t, MONT[idx][0], 0.3));
+  const [x0, w0] = navGeo[from], [x1, w1] = navGeo[to];
+  const pill = nav.querySelector('.pill');
+  pill.style.left = lerp(x0, x1, k) + 'px'; pill.style.width = lerp(w0, w1, k) + 'px';
+  nav.querySelectorAll('.ni').forEach((e, i) => e.classList.toggle('on', i === (k > .5 ? to : from)));
+  MONT.forEach(([t0], i) => {
+    const el = $('sl' + i);
+    const a = eo(P(t, t0, 0.3)), end = i < MONT.length - 1 ? MONT[i + 1][0] : 99, b = eo(P(t, end, 0.3));
+    T(el, { x: (1 - a) * 140 - b * 140, o: t < t0 ? 0 : a * (1 - b) });
+  });
+}
+
+// ===== S6 AI 오답노트 (24–34) =====
+cue(25.6, 'shutter'); cue(25.9, 'scan', 0.6); cue(26.6, 'tok', 0.6);
+[28.0, 28.3, 28.6].forEach(t => cue(t, 'tick', 0.45)); cue(29.0, 'tok', 0.4); cue(29.2, 'tok', 0.4);
+cue(30.0, 'draw', 0.45); cue(31.65, 'swish', 0.4);
+let graphBuilt = false, gPathLen = 0;
+function buildGraph() {
+  const g = $('graph'); const W = 1000, H = 400, X0 = 60, Y0 = 30;
+  const xmin = -1, xmax = 5, ymin = -2, ymax = 8;
+  const mx = x => X0 + (x - xmin) / (xmax - xmin) * W, my = y => Y0 + (ymax - y) / (ymax - ymin) * H;
+  let s = '';
+  for (let x = xmin; x <= xmax; x++) s += `<line x1="${mx(x)}" y1="${Y0}" x2="${mx(x)}" y2="${Y0 + H}" stroke="#3a3c42" stroke-width="1.5"/>`;
+  for (let y = ymin; y <= ymax; y += 2) s += `<line x1="${X0}" y1="${my(y)}" x2="${X0 + W}" y2="${my(y)}" stroke="#3a3c42" stroke-width="1.5"/>`;
+  s += `<line x1="${X0}" y1="${my(0)}" x2="${X0 + W}" y2="${my(0)}" stroke="#80838c" stroke-width="2.5"/>`;
+  s += `<line x1="${mx(0)}" y1="${Y0}" x2="${mx(0)}" y2="${Y0 + H}" stroke="#80838c" stroke-width="2.5"/>`;
+  for (let x = xmin; x <= xmax; x++) if (x && (x < 1 || x > 3)) s += `<text x="${mx(x)}" y="${my(0) + 24}" fill="#949ba4" font-size="17" font-family="A" font-weight="700" text-anchor="middle">${x}</text>`;
+  for (let y = ymin; y <= ymax; y += 2) if (y) s += `<text x="${mx(0) - 12}" y="${my(y) + 6}" fill="#949ba4" font-size="17" font-family="A" font-weight="700" text-anchor="end">${y}</text>`;
+  let d = '';
+  for (let i = 0; i <= 120; i++) { const x = xmin + (xmax - xmin) * i / 120, y = x * x - 4 * x + 3; d += (i ? 'L' : 'M') + mx(x).toFixed(1) + ' ' + my(y).toFixed(1); }
+  s += `<path id="parab" d="${d}" fill="none" stroke="#5865F2" stroke-width="5" stroke-linecap="round"/>`;
+  [[2, -1, '꼭짓점 (2, −1)', 0, 44], [1, 0, '(1, 0)', -58, 34], [3, 0, '(3, 0)', 58, 34]].forEach(([x, y, l, dx, dy], i) => {
+    s += `<g id="pt${i}"><circle cx="${mx(x)}" cy="${my(y)}" r="9" fill="#f2f3f5" stroke="#5865F2" stroke-width="4"/>` +
+      `<text x="${mx(x) + dx}" y="${my(y) + dy}" fill="#f2f3f5" font-size="21" font-family="P" font-weight="700" text-anchor="middle">${l}</text></g>`;
+  });
+  s += `<g id="glabel"><rect x="${X0 + W - 196}" y="${Y0 + 8}" width="190" height="40" rx="8" fill="#3a3d5c"/>` +
+    `<text x="${X0 + W - 101}" y="${Y0 + 36}" fill="#8c95ff" font-size="22" font-family="A" font-weight="800" text-anchor="middle">y=x^2-4x+3</text></g>`;
+  g.innerHTML = s;
+  gPathLen = $('parab').getTotalLength();
+  graphBuilt = true;
+}
+function s6(t) {
+  if (!graphBuilt) buildGraph();
+  // paper close-up with camera viewfinder
+  const sheet = $('sheet');
+  const shot = t >= 25.6;
+  const sk = eo(P(t, 24, 1.6));
+  sheet.style.transform = `translate(${lerp(40, 0, sk)}px,${lerp(30, 0, sk)}px) scale(${lerp(1.06, 1, sk)}) rotate(-2deg)`;
+  sheet.style.filter = shot ? `saturate(${lerp(1, 0.4, P(t, 25.9, 0.6))}) brightness(${lerp(1, 0.86, P(t, 25.9, 0.6))})` : 'none';
+  const sheetOut = eo(P(t, 27.1, 0.4));
+  sheet.style.opacity = 1 - P(t, 27.1, 0.22);
+  T($('vf'), { o: (1 - P(t, 25.75, 0.2)) * eo(P(t, 24.05, 0.3)) });
+  const sh = $('shut'); sh.style.transform = `scale(${t > 25.5 && t < 25.7 ? 0.88 : 1})`;
+  $('flash').style.opacity = t < 25.6 ? 0 : 0.85 * (1 - P(t, 25.6, 0.22));
+  // scan line top -> bottom 1.2s
+  const scy = lerp(-10, 1090, P(t, 25.9, 1.2));
+  const scanOn = t >= 25.9 && t < 27.15;
+  $('scan').style.transform = `translateY(${scy}px)`; $('scan').style.opacity = scanOn ? 1 : 0;
+  $('scantint').style.height = Math.max(0, scy) + 'px'; $('scantint').style.opacity = scanOn ? 1 : (t >= 27.15 ? 1 - P(t, 27.15, 0.3) : 0);
+  // detection box around problem 21 (measured once from layout)
+  const pr = $('prob').getBoundingClientRect();
+  const d = $('detect'), dk = pop(t, 26.6, 0.3, 1.06);
+  Object.assign(d.style, { left: (pr.left - 8) + 'px', top: (pr.top - 8) + 'px', width: (pr.width + 16) + 'px', height: (pr.height + 16) + 'px' });
+  d.style.opacity = dk.o * (1 - P(t, 27.1, 0.22)); d.style.transform = `scale(${dk.s})`;
+  $('prob').style.background = t > 26.6 ? `rgba(88,101,242,${0.12 * eo(P(t, 26.6, 0.3))})` : 'transparent';
+  // problem crop lifts and slides left (잘려 나와 정렬)
+  $('prob').style.transform = `translateX(${-sheetOut * 60}px) scale(${1 + 0.03 * sheetOut})`;
+  // real 오답노트 screen
+  const c = $('cam6');
+  const A = [720, 492, 1.68], B = [720, 900, 1.36], L = [720, 545, 1.45];
+  // dip out/in around the camera jump at 31.6 so the two screens never overlap
+  c.style.opacity = eo(P(t, 27.3, 0.3)) * (t < 31.6 ? 1 - P(t, 31.42, 0.18) : eo(P(t, 31.6, 0.25)));
+  if (t < 29.8) cam(c, ...A);
+  else if (t < 31.6) camLerp(c, A, B, eio(P(t, 29.8, 0.8)));
+  else cam(c, ...L);
+  $('wnB').style.opacity = t >= 31.6 ? 1 : 0;
+  $('wnGraph').style.opacity = t >= 31.6 ? 0 : 1;
+  // 한 줄씩 쓰기: wipe covers away left -> right
+  [['wn_l0', 28.0], ['wn_l1', 28.3], ['wn_l2', 28.6], ['wn_c0', 29.0], ['wn_c1', 29.2]].forEach(([id, t0]) => {
+    const el = $(id), k = eo(P(t, t0, 0.28));
+    el.style.transformOrigin = '100% 50%'; el.style.transform = `scaleX(${1 - k})`;
+  });
+  // graph: draw parabola left -> right 0.8s, then points
+  const gk = eo(P(t, 30.05, 0.8));
+  $('parab').setAttribute('stroke-dasharray', `${gPathLen * gk} 9999`);
+  [0, 1, 2].forEach(i => { const p = pop(t, 30.75 + i * 0.08, 0.3, 0.6); $('pt' + i).style.opacity = p.o; });
+  $('glabel').style.opacity = eo(P(t, 29.95, 0.3));
+  rise($('hd6'), t, 24.1, 27.3);
+}
+
+// ===== S7 운호스터디 (34–42) =====
+cue(35.95, 'swish', 0.35); cue(37.25, 'chime'); cue(38.62, 'click', 0.6); cue(39.5, 'tick', 0.5); cue(39.9, 'tick', 0.5);
+function s7(t) {
+  // question on navy
+  ['q0', 'q1', 'q2'].forEach((id, i) => rise($(id), t, 34.0 + i * 0.3, 35.4));
+  rise($('hd7'), t, 34.05, 37.7);
+  const c = $('cam7');
+  const BAN = [835, 200, 1.55], VID = [835, 620, 1.25], WIDE = [790, 590, 1.12];
+  c.style.opacity = eo(P(t, 35.6, 0.3));
+  if (t < 37.9) cam(c, ...BAN);
+  else if (t < 40.2) camLerp(c, BAN, VID, eio(P(t, 37.9, 0.9)));
+  else camLerp(c, VID, WIDE, eio(P(t, 40.2, 0.9)));
+  // upload: violet 0 -> 100 (1.3s) then turns green "공개됐어요"
+  const uk = eio(P(t, 35.95, 1.3));
+  const bar = $('upbar'); bar.style.width = (uk * 100) + '%';
+  bar.style.background = t < 37.25 ? '#9184d9' : `color-mix(in srgb, #4ade80 ${eo(P(t, 37.25, 0.25)) * 100}%, #9184d9)`;
+  $('upPct').textContent = Math.round(uk * 100) + '%';
+  $('upR').style.opacity = 1 - P(t, 37.25, 0.2);
+  $('upL').textContent = t < 37.25 ? '업로드 중 · 낮은 화질(360p)로 먼저 공개돼요' : '공개됐어요 · 480p · 720p는 이어서 만들어져요';
+  $('upL').style.color = t < 37.25 ? '#b5bac1' : '#9fe0b7';
+  // cursor to play button, click, controls appear
+  const cur = $('cursor');
+  const play = [835, 632];
+  const px = c._cam.tx + play[0] * c._cam.s, py = c._cam.ty + play[1] * c._cam.s;
+  const mk = eio(P(t, 38.0, 0.55));
+  const cx = lerp(1700, px, mk), cy = lerp(1000, py, mk);
+  const press = t > 38.6 && t < 38.72 ? 0.88 : 1;
+  cur.style.transform = `translate(${cx - 6}px,${cy - 4}px) scale(${press})`;
+  cur.style.opacity = eo(P(t, 37.95, 0.2)) * (1 - P(t, 39.2, 0.3));
+  const rp = $('ripple'), rk = P(t, 38.62, 0.45);
+  Object.assign(rp.style, { left: (px - 50) + 'px', top: (py - 50) + 'px', width: '100px', height: '100px' });
+  rp.style.transform = `scale(${lerp(0.4, 1.4, eo(rk))})`; rp.style.opacity = t < 38.62 ? 0 : (1 - rk) * 0.9;
+  const v = $('vidov'), vk = eo(P(t, 38.65, 0.3));
+  v.style.opacity = vk;
+  $('playhide').style.opacity = eo(P(t, 38.65, 0.25));
+  $('subt').style.opacity = eo(P(t, 38.95, 0.3));
+  const play_s = Math.max(0, t - 38.65);
+  const rate = t < 39.5 ? 1 : t < 39.9 ? 1.5 : 2;
+  $('spd').textContent = rate.toFixed(1) + 'x';
+  $('spd').classList.toggle('on', t >= 39.5);
+  const vt = 12 + play_s * 3 * rate; // sped-up for display
+  $('vtime').textContent = `${Math.floor(vt / 60)}:${String(Math.floor(vt % 60)).padStart(2, '0')} / 6:40`;
+  $('vbar').style.width = (vt / 400 * 100) + '%';
+}
+
+// ===== S8 남다른 점 (42–50) =====
+const PANES = [['pA', 42.0, 44.6], ['pB', 44.6, 47.2], ['pC', 47.2, 50.0]];
+cue(44.3, 'ding'); cue(45.3, 'lock'); cue(46.9, 'ding'); cue(49.6, 'ding');
+PANES.forEach(([, t0], i) => i && cue(t0, 'swish', 0.35));
+function s8(t) {
+  PANES.forEach(([id, t0, t1], i) => {
+    const el = $(id);
+    const last = i === PANES.length - 1;
+    const a = eo(P(t, t0, 0.35)), b = last ? 0 : eo(P(t, t1 - 0.28, 0.25));
+    el.style.display = t >= t0 - 0.01 && (last || t < t1) ? 'block' : 'none';
+    T(el, { y: (1 - a) * 60 - b * 60, o: a * (1 - b) });
+    const kids = [el.querySelector('.L'), el.querySelector('.M'), el.querySelector('.Sb'), el.querySelector('.vis')];
+    kids.forEach((k, j) => { const p = pop(t, t0 + 0.06 * j, 0.4); T(k, { y: (1 - p.o) * 20, o: p.o }); });
+  });
+  // A: ad-free pill pops
+  const ap = pop(t, 42.8, 0.35, 0.6); T($('adzero'), { s: ap.s, o: ap.o });
+  // B: lock closes (shackle drops) and the note blurs
+  const lk = eo(P(t, 45.3, 0.3));
+  $('shackle').setAttribute('transform', `translate(0 ${lerp(-28, 0, lk)})`);
+  $('noteIn').style.filter = `blur(${lerp(0, 9, eo(P(t, 45.2, 0.5)))}px) brightness(${lerp(1, 0.7, lk)})`;
+  // C: flow chips one by one
+  ['f0', 'a0', 'f1', 'a1', 'f2', 'a2', 'f3'].forEach((id, j) => { const p = pop(t, 47.55 + j * 0.16, 0.3, 0.9); T($(id), { x: (1 - p.o) * 30, s: p.s, o: p.o }); });
+}
+
+// ===== S9 사용 장면 (50–56) =====
+cue(50.05, 'swish', 0.4); cue(53.65, 'tok', 0.7);
+function s9(t) {
+  const devs = [
+    ['dMon', 105 + 372, 470, 50.0, [600, 500, 0.8, 0.45]],
+    ['dTab', 105 + 744 + 48 + 278, 470, 50.08, [1330, 500, 0.8, 0.45]],
+    ['dPho', 105 + 744 + 48 + 556 + 48 + 159, 470, 50.16, [960, 500, 1.18, 1]],
+  ];
+  const conv = eio(P(t, 52.6, 0.8));
+  devs.forEach(([id, x, y, t0, [cx, cy, cs, co]]) => {
+    const el = $(id), p = pop(t, t0, 0.45, 0.94);
+    const w = el.offsetWidth, h = el.offsetHeight;
+    const X = lerp(x, cx, conv), Y = lerp(y + (1 - p.o) * 80, cy, conv), S = lerp(p.s, cs, conv);
+    T(el, { x: X - w / 2, y: Y - h / 2, s: S, o: p.o * lerp(1, co, conv) });
+    el.style.zIndex = id === 'dPho' ? 3 : 1;
+  });
+  $('monB').style.opacity = eo(P(t, 52.1, 0.35));
+  const ah = pop(t, 53.6, 0.35, 0.8);
+  T($('addhome'), { x: 1170, y: 250, s: ah.s, o: ah.o });
+  $('addhome').style.zIndex = 5;
+}
+
+// ===== S10 END (56–60) =====
+cue(56.0, 'end');
+function s10(t) {
+  const pk = eo(P(t, 56.0, 0.4));
+  T($('panel'), { x: (1 - pk) * -80, o: pk });
+  const bk = pop(t, 56.15, 0.4, 0.9); T($('pbig'), { s: bk.s, o: bk.o }); $('pbig').style.transformOrigin = '0 100%';
+  rise($('copy'), t, 56.25);
+  if (CONFIG.url) rise($('addr'), t, 56.4);
+}
+
+// ---------- main ----------
+const FN = { s1, s2, s4, s5, s6, s7, s8, s9, s10 };
+function render(t) {
+  for (const [id, [a, b]] of Object.entries(SC)) {
+    const on = t >= a && t < b;
+    $(id).style.display = on ? 'block' : 'none';
+    if (on) FN[id](t);
+  }
+  renderCaption(t);
+}
+async function init() {
+  buildNav($('nav5'));
+  // calendar grid: Oct 2026 starts on Thursday
+  const g = $('calg'); let h = '일월화수목금토'.split('').map(d => `<div class="w">${d}</div>`).join('');
+  for (let i = 0; i < 4; i++) h += '<div></div>';
+  const mk = { 13: '수행', 20: '중간', 21: '중간' };
+  for (let d = 1; d <= 31; d++) h += `<div class="${mk[d] ? 'mk' : ''}">${d}${mk[d] ? `<small>${mk[d]}</small>` : ''}</div>`;
+  g.innerHTML = h;
+  if (CONFIG.url) {
+    $('addr').style.display = 'flex';
+    $('url').textContent = CONFIG.url.replace(/^https?:\/\//, '');
+    $('qr').innerHTML = CONFIG.qrSvg;
+    $('c2').textContent = '휴대폰 · 태블릿 · 컴퓨터, 브라우저로 바로';
+  }
+  await Promise.all(['500 20px P', '600 20px P', '700 20px P', '800 20px P', '700 20px A', '800 20px A'].map(f => document.fonts.load(f, '과제함 D-4 0123')));
+  await document.fonts.ready;
+  await Promise.all([...document.images].map(i => i.decode().catch(() => {})));
+  render(0);
+}
+window.render = render;
+window.DURATION = DURATION;
+window.SFX = SFX;
+window.ready = init();
+</script>
+</body>
+</html>
