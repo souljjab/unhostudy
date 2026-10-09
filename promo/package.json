@@ -1,0 +1,14 @@
+{
+  "name": "gwajeham-promo",
+  "private": true,
+  "description": "과제함 60초 홍보 영상 렌더러",
+  "type": "module",
+  "scripts": {
+    "render": "node render.mjs",
+    "preview": "node render.mjs --still 0.9,2.5,5,7.8,10,12.6,14,17,19,21,22.5,25,26.4,27.2,28.8,30.9,32.5,35,36.6,37.6,39.6,41,43.5,46,49.5,51,53,55,58"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1",
+    "qrcode": "^1.5.4"
+  }
+}
